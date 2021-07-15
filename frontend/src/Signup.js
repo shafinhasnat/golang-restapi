@@ -1,11 +1,14 @@
 import React, { useEffect, useState } from "react";
+import axios from "axios";
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   useEffect(() => {}, []);
-  const handleSubmit = () => {
-    console.log(name, email, password);
+  const handleSubmit = (e) => {
+    // console.log(name, email, password);
+    e.preventDefault();
+    axios.post("http://localhost:10000/register", {name, email, password}).then((res) => console.log(res)).catch((err) => console.log("err", err));
   };
   return (
     <div className="container" style={{ width: "50%" }}>
