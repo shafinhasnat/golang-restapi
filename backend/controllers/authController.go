@@ -3,11 +3,16 @@ package controllers
 import (
 	"fmt"
 
+	"strconv"
+
+	"github.com/dgrijalva/jwt-go"
 	"github.com/gofiber/fiber/v2"
 	"github.com/shafinhasnat/golang-restapi/database"
 	"github.com/shafinhasnat/golang-restapi/models"
 	"golang.org/x/crypto/bcrypt"
 )
+
+const secret = "secret"
 
 func Hello(c *fiber.Ctx) error {
 	return c.SendString("Hello world lpaos")
@@ -55,5 +60,25 @@ func Login(c *fiber.Ctx) error {
 			"message": "incorrect password",
 		})
 	}
-	return c.JSON(user)
+
+	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
+		Issuer: strconv.Itoa(int(user.Id)),
+	})
+	token, err := claims.SignedString([]byte(secret))
+	if err != nil {
+		c.Status(fiber.StatusInternalServerError)
+		return c.JSON(fiber.Map{
+			"message": "Could not login user",
+		})
+	}
+
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    token,
+		HTTPOnly: true,
+	}
+	c.Cookie(&cookie)
+	return c.JSON(fiber.Map{
+		"message": "login success",
+	})
 }

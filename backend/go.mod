@@ -4,6 +4,7 @@ go 1.16
 
 require (
 	github.com/andybalholm/brotli v1.0.3 // indirect
+	github.com/dgrijalva/jwt-go v3.2.0+incompatible // indirect
 	github.com/gofiber/fiber/v2 v2.14.0
 	github.com/gorilla/mux v1.8.0
 	github.com/jackc/pgx/v4 v4.12.0 // indirect
