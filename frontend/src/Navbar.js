@@ -1,29 +1,30 @@
 import React from "react";
+import { Link } from "react-router-dom";
+import axios from 'axios';
+import { Redirect, useHistory } from "react-router-dom";
 const Navbar = (props) => {
   const { auth } = props;
+  const history = useHistory();
   const handleLogout = () => {
-      console.log("logout")
+      axios.get("http://localhost:10000/logout").then(res => {console.log(res)})
   };
   return (
     <nav className="navbar navbar-expand-lg navbar-dark bg-dark" style={{marginBottom: 20}}>
       <div className="container-fluid">
-        <a className="navbar-brand" to="/">
+        <Link className="navbar-brand" to="/">
           Golang
-        </a>
+        </Link>
         {!auth ? (
           <div className="navbar-nav">
-            <a className="nav-link active">
+            <Link className="nav-link active" to="/login">
               Login
-            </a>
-            <a className="nav-link active">
+            </Link>
+            <Link className="nav-link active" to="/signup">
               Signup
-            </a>
+            </Link>
           </div>
         ) : (
           <div className="navbar-nav">
-            <a className="nav-link active">
-              Favourite
-            </a>
             <a className="nav-link active" onClick={handleLogout}>
               Logout
             </a>
