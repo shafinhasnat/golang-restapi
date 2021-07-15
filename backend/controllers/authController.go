@@ -2,6 +2,7 @@ package controllers
 
 import (
 	"fmt"
+	"time"
 
 	"strconv"
 
@@ -62,7 +63,8 @@ func Login(c *fiber.Ctx) error {
 	}
 
 	claims := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.StandardClaims{
-		Issuer: strconv.Itoa(int(user.Id)),
+		Issuer:    strconv.Itoa(int(user.Id)),
+		ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 	})
 	token, err := claims.SignedString([]byte(secret))
 	if err != nil {
@@ -75,10 +77,44 @@ func Login(c *fiber.Ctx) error {
 	cookie := fiber.Cookie{
 		Name:     "jwt",
 		Value:    token,
+		Expires:  time.Now().Add(time.Hour * 24),
 		HTTPOnly: true,
 	}
 	c.Cookie(&cookie)
 	return c.JSON(fiber.Map{
 		"message": "login success",
 	})
+}
+
+func User(c *fiber.Ctx) error {
+	cookie := c.Cookies("jwt")
+	token, err := jwt.ParseWithClaims(cookie, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
+		return []byte(secret), nil
+	})
+	if err != nil {
+		c.Status(fiber.StatusUnauthorized)
+		return c.JSON(fiber.Map{
+			"message": "unauthorized",
+		})
+	}
+	claims := token.Claims.(*jwt.StandardClaims)
+	var user models.User
+	database.DB.Where("id = ?", claims.Issuer).First(&user)
+	// fmt.Println(token)
+	return c.JSON(user)
+}
+
+func Logout(c *fiber.Ctx) error {
+	cookie := fiber.Cookie{
+		Name:     "jwt",
+		Value:    "",
+		Expires:  time.Now().Add(-time.Hour),
+		HTTPOnly: true,
+	}
+
+	c.Cookie(&cookie)
+	return c.JSON(fiber.Map{
+		"message": "user loggedout",
+	})
+
 }
